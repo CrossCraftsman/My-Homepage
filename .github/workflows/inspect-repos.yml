@@ -1,0 +1,20 @@
+name: Inspect user repositories
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print READMEs for all user repositories
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          repos=$(gh repo list CrossCraftsman --limit 100 --json nameWithOwner --jq '.[].nameWithOwner')
+          for repo in $repos; do
+            echo "===== REPO: $repo ====="
+            gh api "repos/$repo/readme" --jq '.content' | base64 -d || true
+            echo
+          done
