@@ -1,0 +1,27 @@
+name: Read publication data
+
+on:
+  workflow_dispatch:
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print publication files
+        run: |
+          set -euo pipefail
+          for f in _publications/*.md; do
+            echo "===== FILE: $f ====="
+            cat "$f"
+            echo
+          done
+      - name: List CrossCraftsman repositories
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "===== GH REPO LIST ====="
+          gh repo list CrossCraftsman --limit 100 --json name,nameWithOwner,description,url,homepageUrl,repositoryTopics,defaultBranchRef,isFork,isPrivate,visibility,updatedAt
+          echo "===== SEARCH API: user:CrossCraftsman ====="
+          gh api -X GET search/repositories -f q='user:CrossCraftsman' --jq '.items[] | {full_name,description,html_url,homepage_url,topics,default_branch,fork,private,visibility,updated_at}'
